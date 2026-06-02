@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>장안 탐험 — 당나라의 국제도시</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500&display=swap');
+
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --gold-dim: #7a6230;
+    --ink: #1a1410;
+    --paper: #f5efe0;
+    --paper-dark: #e8dfc8;
+    --red: #8b2020;
+    --jade: #2d6b4a;
+    --blue: #1e3d6b;
+    --text: #2a1f10;
+    --text-light: #5a4a30;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background-color: var(--ink);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 17px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(201,168,76,0.03) 40px, rgba(201,168,76,0.03) 41px),
+      repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(201,168,76,0.03) 40px, rgba(201,168,76,0.03) 41px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 24px 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .screen { display: none; animation: fadeIn 0.5s ease; }
+  .screen.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--gold-dim);
+    border-radius: 2px;
+    padding: 40px 44px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5), inset 0 0 60px rgba(201,168,76,0.04);
+    position: relative;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 7px;
+    border: 1px solid rgba(201,168,76,0.18);
+    border-radius: 1px;
+    pointer-events: none;
+  }
+
+  /* 타이틀 */
+  .title-year {
+    font-family: 'Noto Serif KR', serif;
+    color: var(--gold);
+    font-size: 14px;
+    letter-spacing: 4px;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+
+  .title-main {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 38px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  .title-sub {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 17px;
+    color: var(--gold-dim);
+    letter-spacing: 2px;
+    text-align: center;
+  }
+
+  .title-divider {
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 22px auto;
+  }
+
+  .title-desc {
+    font-size: 16px;
+    color: var(--text-light);
+    line-height: 1.9;
+    max-width: 500px;
+    margin: 0 auto 32px;
+    text-align: center;
+  }
+
+  .char-select-label {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 14px;
+    color: var(--gold-dim);
+    letter-spacing: 2px;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+
+  .character-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .character-card {
+    background: var(--paper-dark);
+    border: 2px solid transparent;
+    border-radius: 2px;
+    padding: 26px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .character-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+
+  .character-card.persia::after { background: var(--red); }
+  .character-card.monk::after { background: var(--jade); }
+  .character-card.silla::after { background: var(--blue); }
+
+  .character-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+  .character-card:hover::after { transform: scaleX(1); }
+  .character-card.persia:hover { border-color: var(--red); }
+  .character-card.monk:hover { border-color: var(--jade); }
+  .character-card.silla:hover { border-color: var(--blue); }
+
+  .char-emoji { font-size: 42px; margin-bottom: 12px; display: block; }
+
+  .char-name {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .char-origin {
+    font-size: 12px;
+    color: var(--gold-dim);
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  .char-desc { font-size: 13px; color: var(--text-light); line-height: 1.7; }
+
+  /* 게임 헤더 */
+  .progress-wrap { margin-bottom: 22px; }
+  .progress-bar { height: 2px; background: var(--paper-dark); border-radius: 1px; overflow: hidden; margin-bottom: 7px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); transition: width 0.4s ease; }
+  .progress-text { font-size: 13px; color: var(--text-light); letter-spacing: 1px; }
+
+  .scene-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 22px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--gold-dim);
+  }
+
+  .scene-character { font-size: 30px; }
+  .scene-info { flex: 1; }
+  .scene-char-name { font-family: 'Noto Serif KR', serif; font-size: 14px; font-weight: 700; color: var(--gold); }
+  .scene-num { font-size: 12px; color: var(--text-light); letter-spacing: 1px; }
+  .scene-location { font-size: 13px; color: var(--gold-dim); text-align: right; letter-spacing: 1px; }
+
+  .scene-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 18px;
+    line-height: 1.4;
+  }
+
+  /* 만남 배지 */
+  .encounter-badge {
+    display: inline-block;
+    background: rgba(201,168,76,0.15);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-size: 12px;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    border-radius: 1px;
+    margin-bottom: 12px;
+  }
+
+  .source-box {
+    background: rgba(201,168,76,0.07);
+    border-left: 3px solid var(--gold);
+    padding: 15px 17px;
+    margin-bottom: 18px;
+    border-radius: 0 2px 2px 0;
+  }
+
+  .source-label { font-size: 11px; color: var(--gold); letter-spacing: 2px; font-weight: 500; margin-bottom: 7px; }
+  .source-text { font-size: 14px; color: var(--text-light); line-height: 1.8; }
+
+  .scene-text { font-size: 16px; color: var(--text); line-height: 2.0; margin-bottom: 26px; }
+
+  .scene-question {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 18px;
+    padding: 14px 0;
+    border-top: 1px solid var(--paper-dark);
+  }
+
+  .choices { display: flex; flex-direction: column; gap: 11px; }
+
+  .choice-btn {
+    background: var(--paper-dark);
+    border: 1px solid var(--gold-dim);
+    border-radius: 2px;
+    padding: 16px 20px 16px 44px;
+    text-align: left;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.7;
+    transition: all 0.25s ease;
+    position: relative;
+  }
+
+  .choice-btn::before {
+    content: attr(data-num);
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Noto Serif KR', serif;
+    font-size: 13px;
+    color: var(--gold-dim);
+    font-weight: 700;
+  }
+
+  .choice-btn:hover {
+    background: var(--paper);
+    border-color: var(--gold);
+    transform: translateX(5px);
+  }
+
+  /* 결과 */
+  .result-box {
+    background: rgba(201,168,76,0.06);
+    border: 1px solid var(--gold-dim);
+    border-radius: 2px;
+    padding: 18px 20px;
+    margin: 16px 0;
+  }
+
+  .result-label { font-size: 11px; color: var(--gold); letter-spacing: 2px; margin-bottom: 9px; }
+  .result-text { font-size: 15px; color: var(--text); line-height: 1.9; }
+
+  .insight-box {
+    background: rgba(44,31,16,0.05);
+    border-left: 3px solid var(--gold);
+    padding: 14px 17px;
+    margin: 14px 0;
+  }
+
+  .insight-label { font-size: 11px; color: var(--gold-dim); letter-spacing: 2px; margin-bottom: 7px; }
+  .insight-text { font-size: 14px; color: var(--text-light); line-height: 1.8; font-style: italic; }
+
+  /* 버튼 */
+  .btn-primary {
+    background: var(--gold);
+    color: var(--ink);
+    border: none;
+    padding: 15px 34px;
+    font-family: 'Noto Serif KR', serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: all 0.25s ease;
+    border-radius: 1px;
+  }
+
+  .btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(201,168,76,0.3); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--gold-dim);
+    border: 1px solid var(--gold-dim);
+    padding: 11px 24px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.25s ease;
+    border-radius: 1px;
+  }
+
+  .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-row { display: flex; gap: 12px; margin-top: 26px; flex-wrap: wrap; }
+
+  /* 엔딩 */
+  .ending-title { font-family: 'Noto Serif KR', serif; font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 8px; text-align: center; }
+  .ending-subtitle { font-size: 14px; color: var(--gold-dim); text-align: center; letter-spacing: 2px; margin-bottom: 28px; }
+
+  .summary-item {
+    display: flex;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--paper-dark);
+    font-size: 14px;
+    color: var(--text-light);
+    line-height: 1.7;
+  }
+
+  .summary-num { font-family: 'Noto Serif KR', serif; color: var(--gold); font-weight: 700; flex-shrink: 0; width: 22px; }
+
+  .keyword-wrap { display: flex; flex-wrap: wrap; gap: 9px; margin: 16px 0; }
+
+  .keyword {
+    background: var(--paper-dark);
+    border: 1px solid var(--gold-dim);
+    padding: 5px 14px;
+    font-size: 13px;
+    color: var(--text);
+    border-radius: 1px;
+    font-family: 'Noto Serif KR', serif;
+  }
+
+  .write-prompt {
+    background: linear-gradient(135deg, rgba(201,168,76,0.1), rgba(201,168,76,0.04));
+    border: 1px solid var(--gold);
+    border-radius: 2px;
+    padding: 22px;
+    margin-top: 22px;
+  }
+
+  .write-prompt-title { font-family: 'Noto Serif KR', serif; font-size: 15px; font-weight: 700; color: var(--gold); margin-bottom: 10px; letter-spacing: 1px; }
+  .write-prompt-text { font-size: 15px; color: var(--text); line-height: 1.9; }
+  .write-condition { margin-top: 12px; padding-left: 16px; }
+  .write-condition li { font-size: 14px; color: var(--text-light); line-height: 2.0; list-style: none; padding: 2px 0; }
+  .write-condition li::before { content: '— '; color: var(--gold-dim); }
+
+  @media (max-width: 600px) {
+    .card { padding: 26px 18px; }
+    .character-grid { grid-template-columns: 1fr; }
+    .title-main { font-size: 28px; }
+    body { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- 타이틀 -->
+  <div id="screen-title" class="screen active">
+    <div class="card">
+      <div class="title-year">서기 8세기 · 당나라</div>
+      <div class="title-main">장안(長安)에<br>오신 것을 환영합니다</div>
+      <div class="title-sub">세계의 수도로 불린 도시</div>
+      <div class="title-divider"></div>
+      <p class="title-desc">
+        인구 100만 명. 세계 각지에서 온 상인, 승려, 외교관.<br>
+        지금으로부터 1,300년 전, 이 도시는 지구상에서<br>가장 크고 다양한 곳이었습니다.<br><br>
+        당신은 어떤 이유로 장안에 왔나요?
+      </p>
+      <div class="char-select-label">인물을 선택하세요</div>
+      <div class="character-grid">
+        <div class="character-card persia" onclick="startGame('persia')">
+          <span class="char-emoji">🐪</span>
+          <div class="char-name">소그드 상인</div>
+          <div class="char-origin">페르시아 · 사마르칸트</div>
+          <div class="char-desc">비단과 유리구슬을 싣고 실크로드를 넘어온 상인. 장안의 시장을 향하고 있습니다.</div>
+        </div>
+        <div class="character-card monk" onclick="startGame('monk')">
+          <span class="char-emoji">📿</span>
+          <div class="char-name">일본 유학승</div>
+          <div class="char-origin">일본 · 나라</div>
+          <div class="char-desc">당나라의 불교와 문화를 배워 일본에 전하기 위해 긴 항해 끝에 도착한 승려.</div>
+        </div>
+        <div class="character-card silla" onclick="startGame('silla')">
+          <span class="char-emoji">⚔️</span>
+          <div class="char-name">신라 왕자</div>
+          <div class="char-origin">신라 · 금성(경주)</div>
+          <div class="char-desc">삼국통일 직후의 신라. 당나라의 선진 문물을 배우러 파견된 왕족 유학생.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 게임 -->
+  <div id="screen-game" class="screen">
+    <div class="card">
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+        <div class="progress-text" id="progress-text">장면 1 / 4</div>
+      </div>
+      <div class="scene-header">
+        <div class="scene-character" id="scene-char-emoji"></div>
+        <div class="scene-info">
+          <div class="scene-char-name" id="scene-char-name"></div>
+          <div class="scene-num" id="scene-num"></div>
+        </div>
+        <div class="scene-location" id="scene-location"></div>
+      </div>
+      <div id="scene-content"></div>
+    </div>
+  </div>
+
+  <!-- 엔딩 -->
+  <div id="screen-ending" class="screen">
+    <div class="card">
+      <div id="ending-content"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const STORIES = {
+  persia: {
+    emoji: '🐪',
+    name: '소그드 상인 바람',
+    scenes: [
+      {
+        location: '장안 서문 · 입성',
+        title: '드디어 장안이다',
+        encounter: null,
+        source: {
+          label: '📜 교과서 자료 — 당삼채(唐三彩)',
+          text: '낙타를 탄 서역 상인을 묘사한 당나라 도자기. 장안의 시장에는 중앙아시아와 서아시아에서 온 상인들이 활발히 활동했다.'
+        },
+        text: '사마르칸트에서 낙타에 유리구슬, 향료, 비단을 싣고 수천 리를 걸어왔습니다. 장안 서문에 들어서자 아랍어, 돌궐어, 한어가 뒤섞여 들립니다. 거리에는 당나라 사람 외에도 수염 기른 페르시아인, 검은 피부의 남방인, 금발의 서역인이 오고 갑니다. 이 도시는… 세상의 모든 곳이 모인 것 같습니다.',
+        question: '당신은 먼저 어디로 가겠습니까?',
+        choices: [
+          { text: '서시(西市)로 향한다. 같은 고향 상인들의 숙소가 있다는 소문을 들었다.', result: '서시에는 "호인방(胡人坊)"이라 불리는 외국 상인 구역이 있었습니다. 페르시아, 아랍, 소그드 상인들이 모여 살며 자신들의 신을 모시는 신전까지 운영했습니다. 당나라는 이를 허용했습니다.', insight: '💡 장안에는 외국인이 집단으로 거주할 수 있는 구역이 존재했다. 당나라는 이를 통제하기보다 허용했다.' },
+          { text: '동시(東市)로 간다. 당나라 귀족들이 외국 물건을 산다고 들었다.', result: '동시에서 유리구슬을 꺼내자 귀족 부인의 시녀가 눈을 빛냅니다. "서역의 유리! 얼마요?" 당나라 사람들은 외국 물건을 신기하게 여기는 것이 아니라, 일상적으로 사고팔았습니다.', insight: '💡 외국 물건이 장안 시장에서 일상적으로 거래되었다. 외국 문화에 대한 당나라의 태도는 개방적이었다.' },
+          { text: '먼저 관청에 가서 교역 허가 문서를 받아야 한다.', result: '율령에 따라 외국 상인은 입성 시 관청에 등록해야 했습니다. 하지만 절차는 까다롭지 않았습니다. 관리가 말합니다: "어디서 왔소? 사마르칸트? 반갑소. 이 도장 받아가시오." 당나라는 외국 상인의 활동을 관리하되 막지는 않았습니다.', insight: '💡 당나라는 외국인의 입국과 활동을 제도적으로 관리했지만, 원칙적으로 개방적이었다.' }
+        ]
+      },
+      {
+        location: '서시(西市) · 조로아스터교 신전',
+        title: '고향의 신전을 만나다',
+        encounter: null,
+        source: {
+          label: '📜 교과서 자료 — 장안성 모식도',
+          text: '장안성에는 경교(기독교 일파), 조로아스터교(배화교), 이슬람교의 사원이 존재했다. 이는 당나라가 다양한 종교를 허용했음을 보여준다.'
+        },
+        text: '서시 한쪽에 고향에서 보던 불꽃 문양이 새겨진 건물이 있습니다. 조로아스터교 신전입니다. 동료 상인이 반깁니다: "여기 장안에만 우리 신전이 여러 개야. 당 황제가 허락해줬어." 불을 피우는 의식이 진행 중입니다. 그 옆 골목에는 십자가 문양의 경교 교회도 보입니다.',
+        question: '이 광경을 보고 어떤 생각이 듭니까?',
+        choices: [
+          { text: '우리 종교를 인정해준다니 놀랍다. 고향을 떠나온 외로움이 사라지는 것 같다.', result: '실제로 장안에는 조로아스터교 신전 외에도 경교(기독교 일파), 이슬람 사원도 있었습니다. 당나라는 외래 종교를 탄압하지 않았습니다. 이것이 외국인들이 장안에 장기 정착할 수 있었던 이유 중 하나입니다.', insight: '💡 장안은 세계 다양한 종교가 공존하는 도시였다. 이는 당나라의 문화적 자신감과 개방성을 보여준다.' },
+          { text: '신전은 반갑지만, 장사가 더 급하다. 빨리 물건을 팔러 가야겠다.', result: '동료 상인이 말합니다: "장사도 중요하지만, 이 신전이 있어서 우리 같은 외국인이 오래 머물 수 있는 거야. 아이들도 여기서 자라고." 장안의 외국인 커뮤니티는 종교 시설을 중심으로 유지되었습니다.', insight: '💡 종교 시설은 외국인이 장안에 정착하고 머무는 데 중요한 역할을 했다.' },
+          { text: '당나라 사람들은 왜 외국 종교를 허용했을까? 이해가 안 된다.', result: '학자들은 당 황제가 "하늘 아래 모든 것이 황제의 것"이라는 자신감 있는 세계관을 가졌기 때문이라고 봅니다. 외래 종교와 문화를 받아들이는 것이 강대한 제국의 위대함을 보여준다고 여겼을 수 있습니다.', insight: '💡 당나라의 개방성은 단순한 관용이 아니라, 강대한 제국으로서의 자신감에서 비롯된 것일 수 있다.' }
+        ]
+      },
+      {
+        location: '시장 찻집 · 신라 왕자와의 만남',
+        title: '여기서 신라 사람을 만나다니',
+        encounter: '👥 다른 인물과의 만남 — 신라 왕자',
+        source: {
+          label: '📜 역사 기록 — 당나라 귀족 문화',
+          text: '당나라 귀족들은 시(詩), 서예, 회화를 즐겼다. 이백(李白)의 시가 유행했고, 구양순의 서체는 동아시아 전역에 퍼졌다. 귀족 문화는 장안을 중심으로 꽃피웠다.'
+        },
+        text: '찻집에서 쉬던 중, 신라 복장을 한 젊은이가 옆에 앉습니다. 신라 왕자 김충이라고 자신을 소개합니다. "여기 당나라 귀족들은 정말 이상해요. 시장에서 물건 사는 것보다 시(詩) 한 수를 더 자랑스러워한다니까요. 이백이라는 시인이 요즘 장안에서 난리랍니다." 당신은 장사꾼이라 시는 잘 모르지만, 귀족들이 문화에 열심인 덕에 외국 물건도 잘 팔린다는 것은 압니다.',
+        question: '신라 왕자와 이야기를 나누며 무슨 생각이 듭니까?',
+        choices: [
+          { text: '귀족들이 시와 그림을 즐기는 덕에 내 물건도 잘 팔리는 거구나. 문화와 장사는 연결되어 있다.', result: '정확한 통찰입니다. 당나라 귀족들의 풍요롭고 세련된 문화가 외국 물건에 대한 수요도 만들었습니다. 서역산 포도주, 유리, 향료가 귀족들 사이에서 고급품으로 여겨진 것도 이 문화적 분위기 덕분입니다.', insight: '💡 당나라 귀족 문화의 번성은 장안의 경제적 활력과 연결되어 있었다. 문화와 상업은 서로를 키웠다.' },
+          { text: '신라에서 여기까지 오다니, 이 친구도 대단하다. 장안에 오는 사람들의 목적은 정말 다양하구나.', result: '맞습니다. 장안에는 장사하러 온 상인, 불교를 배우러 온 승려, 제도를 배우러 온 유학생, 황제에게 예를 올리러 온 사신까지 다양한 목적의 사람들이 모였습니다. 이 다양성 자체가 장안을 국제도시로 만들었습니다.', insight: '💡 장안의 국제성은 단순히 여러 나라 사람이 모인 것이 아니라, 각자 다른 목적을 가진 사람들이 공존했다는 데 있다.' },
+          { text: '이백? 나도 그 이름은 들었다. 당나라 귀족들이 그렇게 시를 좋아한다면, 시를 새긴 물건을 팔면 어떨까?', result: '상인다운 발상입니다. 실제로 당나라 귀족 문화의 유행은 다양한 소비를 만들어냈습니다. 시가 유행하면 붓과 먹이 팔리고, 음악이 유행하면 악기와 악보가 팔렸습니다. 문화 유행이 경제를 움직였습니다.', insight: '💡 귀족 문화의 유행은 장안 시장의 소비 패턴에도 영향을 미쳤다. 문화와 경제는 긴밀하게 연결되어 있었다.' }
+        ]
+      },
+      {
+        location: '서시 주점 · 저녁',
+        title: '호선무(胡旋舞)가 흘러나오는 밤',
+        encounter: null,
+        source: {
+          label: '📜 역사 기록',
+          text: '장안의 귀족들은 서역의 음악과 춤을 즐겼다. 비파 소리에 맞춰 추는 호선무는 당나라 궁중에서도 유행했다. 서역풍 모자와 복장이 귀족 여성들 사이에서 유행하기도 했다.'
+        },
+        text: '저녁이 되자 주점에서 서역 음악이 흘러나옵니다. 빠르게 돌아가는 무희의 춤사위 — 호선무(胡旋舞)입니다. 당나라 귀족들이 박수를 치며 즐깁니다. "저게 우리 고향 춤이잖아?" 동료 상인이 눈을 빛냅니다. 당나라 사람들이 우리 문화를 이렇게 좋아할 줄이야.',
+        question: '이 장면을 보고 무슨 생각이 드십니까?',
+        choices: [
+          { text: '당나라 사람들이 우리 문화를 즐기는 것이 묘한 기분이다.', result: '당나라 귀족들은 서역의 음악, 춤, 패션을 적극적으로 받아들였습니다. 이것이 단순한 호기심이 아니라 일상적인 유행이었습니다. 문화는 강한 나라가 아니라, 매력 있는 곳에서 흘러가는 것 같습니다.', insight: '💡 당나라는 자국 문화의 우월성에 집착하지 않고, 외래 문화를 적극 수용했다. 이것이 당 문화를 더욱 풍부하게 만들었다.' },
+          { text: '이런 분위기라면 내 물건도 잘 팔리겠다! 내일 시장에서 더 적극적으로 흥정해야겠다.', result: '외래 문화에 대한 개방적 태도는 외국 물건에 대한 수요도 높였습니다. 서역산 포도주, 향료, 유리제품은 장안 귀족들 사이에서 고급품으로 여겨졌습니다. 문화적 개방성과 경제적 교류는 서로 연결되어 있었습니다.', insight: '💡 문화적 개방성과 경제적 교류는 서로 연결되어 있었다. 당나라의 열린 태도가 장안을 경제적으로도 풍요롭게 했다.' },
+          { text: '여기 있으면 고향 생각이 덜 날 것 같다. 오래 머물고 싶다.', result: '실제로 장안에는 고향 음식, 고향 종교, 고향 음악이 있었습니다. 어떤 소그드 상인은 장안에서 태어나고 장안에서 생을 마쳤다는 기록도 있습니다. 장안은 방문하는 곳이 아니라 정착해서 사는 생활 공간이기도 했습니다.', insight: '💡 장안은 단순히 방문하는 곳이 아니라, 외국인이 정착하고 살아가는 생활 공간이기도 했다.' }
+        ]
+      }
+    ],
+    ending: {
+      title: '소그드 상인 바람의 장안 탐험',
+      keywords: ['다양한 외국인 거주', '종교의 자유', '외래 문화 수용', '무역 활성화', '귀족 문화와 상업의 연결'],
+    }
+  },
+
+  monk: {
+    emoji: '📿',
+    name: '유학승 엔닌',
+    scenes: [
+      {
+        location: '대안탑(大雁塔) · 자은사',
+        title: '현장법사의 탑 아래에서',
+        encounter: null,
+        source: {
+          label: '📜 교과서 자료 — 불교의 전파',
+          text: '당나라 승려 현장은 인도에서 불경을 가져와 번역했다. 대안탑은 이 경전을 보관하기 위해 세운 탑이다. 장안은 동아시아 불교의 중심지였다.'
+        },
+        text: '자은사 대안탑 앞에 섰습니다. 현장법사가 인도에서 가져온 경전을 보관하기 위해 세운 탑입니다. 사찰 안에는 신라, 발해, 일본에서 온 승려들이 함께 공부하고 있습니다. 선생님은 당나라 고승이지만, 제자들은 동아시아 각국 출신입니다. "내가 여기까지 온 것이 옳았구나."',
+        question: '장안에 온 목적을 다시 생각해봅니다. 무엇이 가장 중요합니까?',
+        choices: [
+          { text: '불교 경전을 구해 일본에 가져가고 싶다. 일본에는 아직 없는 경전이 많다.', result: '실제로 많은 일본 승려들이 이 목적으로 당나라에 왔습니다. 현장법사가 인도에서 가져온 경전들이 대안탑에 있었고, 이것들이 일본으로 전해졌습니다. 지식은 장안을 통해 동아시아로 흘러갔습니다.', insight: '💡 장안은 불교 지식의 집산지였다. 동아시아 각지의 승려들이 이곳에서 배우고 자국으로 돌아갔다.' },
+          { text: '당나라의 율령과 제도를 배워 일본 정치에 적용하고 싶다.', result: '실제로 일본은 7~8세기에 당나라 율령을 본떠 다이호 율령을 만들었습니다. 수도 나라(奈良)의 구조도 장안을 모방했습니다. 정치 제도가 장안에서 일본으로 전해진 것입니다.', insight: '💡 당나라의 제도는 단순히 당나라만의 것이 아니었다. 동아시아 여러 나라가 이를 모델로 삼았다.' },
+          { text: '장안이라는 도시 자체를 직접 보고 싶었다. 소문이 너무 많아서.', result: '당시 장안의 명성은 동아시아 전역에 퍼져 있었습니다. "장안에 가봤다"는 것 자체가 학식과 견문의 증거였습니다. 실제로 많은 유학생들이 학문과 동시에 장안의 문물을 경험하고 돌아갔습니다.', insight: '💡 장안은 지식의 중심지인 동시에 동경의 대상이었다. 이 도시의 명성 자체가 사람들을 끌어들였다.' }
+        ]
+      },
+      {
+        location: '국자감 · 소그드 상인 아들과의 만남',
+        title: '외국인도 이 학교에 다닌다고?',
+        encounter: '👥 다른 인물과의 만남 — 소그드 상인의 아들',
+        source: {
+          label: '📜 역사 기록 — 국자감',
+          text: '당나라 최고 교육기관 국자감은 외국 유학생의 입학을 허용했다. 신라, 일본뿐 아니라 서역 출신 학생도 있었다는 기록이 전해진다.'
+        },
+        text: '국자감 복도에서 눈이 동그랗고 코가 높은 소년을 만납니다. 서역계 외모인데 유창한 한어로 말을 겁니다. "저는 장안에서 태어난 소그드 상인의 아들이에요. 아버지가 여기서 장사하다가 눌러앉으셨거든요. 저는 당나라 과거시험을 준비 중이에요." 외국인 2세가 당나라 관리가 되려 공부하고 있다니, 놀랍습니다.',
+        question: '이 소년을 보고 어떤 생각이 듭니까?',
+        choices: [
+          { text: '외국인도 당나라 시험을 볼 수 있다니. 당나라는 정말 열린 나라구나.', result: '실제로 신라 출신 최치원은 당나라 과거에 합격해 관리가 됐습니다. 당나라는 출신 나라에 관계없이 능력 있는 사람을 등용했습니다. 이것이 장안으로 사람들이 모인 이유 중 하나였습니다.', insight: '💡 당나라는 외국인에게도 능력에 따라 기회를 열어두었다. 이것이 장안을 더욱 다양한 사람들이 모이는 곳으로 만들었다.' },
+          { text: '장안에서 태어나 장안 사람이 된 외국인이라니. 이 도시는 그냥 지나치는 곳이 아니라 삶의 터전이구나.', result: '맞습니다. 장안에는 단기 방문자뿐 아니라 수대에 걸쳐 장안에서 산 외국계 주민들이 있었습니다. 이들은 당나라 문화를 흡수하면서도 자신들의 정체성을 유지했습니다.', insight: '💡 장안의 국제성은 일시적 방문이 아니라, 외국계 주민이 대대로 정착한 생활 공간에서 나왔다.' },
+          { text: '한자를 배운다는 것이 이 세계에 들어오는 열쇠인 것 같다.', result: '예리한 관찰입니다. 한자를 안다는 것은 유교, 불교, 율령이 담긴 지식 세계에 접근할 수 있다는 뜻이었습니다. 이 소년도, 나도, 신라 유학생도 한자를 통해 같은 지식 세계를 공유하고 있습니다.', insight: '💡 한자는 동아시아 공통의 지식과 가치관을 담는 그릇이었다. 언어가 달라도 한자로 소통이 가능했다.' }
+        ]
+      },
+      {
+        location: '국자감 · 신라 유학생과 필담',
+        title: '말은 달라도 글로 통한다',
+        encounter: null,
+        source: {
+          label: '📜 교과서 자료 — 동아시아 문화권',
+          text: '한자·유교·율령·불교는 동아시아 여러 나라가 공유한 공통 문화 요소다. 이를 "동아시아 문화권"이라 부른다. 당나라는 이 문화권의 중심이었다.'
+        },
+        text: '국자감 수업 후, 신라에서 온 유학생과 마주칩니다. 일본어와 신라어는 전혀 다르지만, 붓으로 한자를 쓰자 대화가 됩니다. "당신도 불경 공부하러 왔소?" "예. 율령도 배우러 왔소." 우리는 다른 나라에서 왔지만, 같은 이유로 같은 곳에 와 있습니다.',
+        question: '신라 유학생과 필담을 나누며 무슨 생각이 듭니까?',
+        choices: [
+          { text: '한자가 없었다면 우리는 대화도 못 했겠구나. 한자가 이 세계를 연결하고 있다.', result: '정확합니다. 한자는 동아시아의 공통 문자였습니다. 일본, 신라, 당나라 사람들이 서로 다른 말을 써도 붓으로 한자를 쓰면 의사소통이 됐습니다. 이것이 동아시아 문화권의 핵심 연결고리였습니다.', insight: '💡 한자는 동아시아 여러 나라를 연결하는 공통 문자였다. 언어가 달라도 글로 소통할 수 있었다.' },
+          { text: '신라도 일본도 같은 것을 배우러 왔구나. 당나라가 그만큼 대단한 모양이다.', result: '7~8세기 장안에는 신라, 일본, 발해, 베트남 등 동아시아 각국의 유학생들이 있었습니다. 이들은 당나라의 제도, 문자, 불교, 유교를 배워 자국에 전했습니다. 장안은 동아시아 지식의 허브였습니다.', insight: '💡 동아시아 나라들이 공통으로 당나라를 모델로 삼은 것이 동아시아 문화권 형성의 기반이 되었다.' },
+          { text: '같은 책을 읽고, 같은 가르침을 받는다. 돌아가면 우리는 비슷한 나라가 될까?', result: '중요한 질문입니다. 실제로 동아시아 나라들은 당나라 문화를 받아들이되 완전히 같아지지는 않았습니다. 일본은 율령을 도입하면서도 천황제를 유지했고, 신라는 골품제를 계속 썼습니다. 공통점과 차이점이 동시에 존재했습니다.', insight: '💡 동아시아 나라들은 당나라 문화를 수용하면서도 각자의 독자성을 유지했다.' }
+        ]
+      },
+      {
+        location: '자은사 야경 · 귀국 전날 밤',
+        title: '장안에서 배운 것들',
+        encounter: null,
+        source: {
+          label: '📜 역사 기록 — 엔닌(円仁)의 기록',
+          text: '일본 승려 엔닌은 당나라에서 약 9년간 머물며 불교를 배웠다. 그의 기록 『입당구법순례행기』는 9세기 당나라의 생활을 생생하게 전해준다.'
+        },
+        text: '귀국 전날 밤, 대안탑 아래에 앉아 지난 시간을 돌아봅니다. 국자감의 다국적 교실, 소그드 상인 아들과의 대화, 신라 유학생과의 필담… 장안은 불교만의 도시가 아니었습니다. 다양한 사람들이 다양한 이유로 모여, 서로에게 영향을 주고받는 곳이었습니다.',
+        question: '귀국하면 일본에 무엇을 전하겠습니까?',
+        choices: [
+          { text: '경전과 함께, 이 도시에서 느낀 열린 분위기를 전하고 싶다.', result: '실제로 많은 유학승들이 경전뿐 아니라 당나라의 문화적 분위기, 건축 양식, 의례 방식까지 일본에 전했습니다. 지식과 문화는 함께 이동했습니다.', insight: '💡 문화 전파는 책이나 제도만이 아니라, 사람들의 경험과 감각을 통해서도 이루어졌다.' },
+          { text: '다양한 나라가 함께 공부할 수 있다는 것. 그 자체가 일본에 없는 것이다.', result: '날카로운 관찰입니다. 장안의 국제적 학문 공간은 당시 세계에서 유례가 없었습니다. 이 경험이 귀국 후 일본 사회를 변화시키는 힘이 되었습니다.', insight: '💡 장안에서의 국제적 경험 자체가 유학생들에게 새로운 세계관을 심어주었다.' },
+          { text: '당나라가 강한 이유. 그것을 일본 왕에게 정확히 보고해야 한다.', result: '좋은 목표입니다. 당나라의 강함은 군사력만이 아니라 선진 제도, 풍부한 문화, 열린 태도에 있었습니다. 이것을 모델로 삼으려 한 나라가 일본뿐 아니라 신라, 발해 등 동아시아 전체였습니다.', insight: '💡 당나라가 동아시아의 모델이 된 것은 강압이 아니라, 실제로 배울 만한 것이 있었기 때문이다.' }
+        ]
+      }
+    ],
+    ending: {
+      title: '유학승 엔닌의 장안 탐험',
+      keywords: ['불교 지식의 중심', '한자 공통 문자', '동아시아 유학생 집합', '외국인 정착 허용', '문화 전파'],
+    }
+  },
+
+  silla: {
+    emoji: '⚔️',
+    name: '신라 왕자 김충',
+    scenes: [
+      {
+        location: '장안 성문 · 입성',
+        title: '이게 정말 사람 사는 도시인가',
+        encounter: null,
+        source: {
+          label: '📜 역사 기록 — 신라방(新羅坊)',
+          text: '통일 이후 신라는 당나라에 유학생과 사신을 꾸준히 파견했다. 장안에는 "신라방(新羅坊)"이라는 신라인 거주 구역이 있었고, 신라원(新羅院)이라는 절도 있었다.'
+        },
+        text: '경주에서 출발해 바닷길을 거쳐 드디어 장안에 도착했습니다. 성문을 들어서는 순간 압도됩니다. 끝이 보이지 않는 대로, 수백만 명이 오가는 인파, 들어본 적 없는 언어들… 경주가 작은 마을처럼 느껴집니다. 신라가 삼국을 통일했다고 자랑스러워했는데, 이 도시 앞에서는 아무것도 아닌 것 같습니다.',
+        question: '이 충격에 어떻게 반응합니까?',
+        choices: [
+          { text: '일단 신라방을 찾아간다. 신라 사람들이 모여 사는 구역이 있다고 들었다.', result: '"신라방(新羅坊)"은 실제로 존재했습니다. 당나라에 건너온 신라 상인, 유학생, 승려들이 모여 사는 구역으로, 신라 절(신라원)도 있었습니다. 장보고가 세운 법화원이 대표적입니다. 이방인들은 자신들의 커뮤니티를 만들며 살았습니다.', insight: '💡 신라인들은 장안에 자신들만의 커뮤니티를 형성했다. 이는 당나라가 외국인의 집단 거주를 허용했음을 보여준다.' },
+          { text: '도시 구조를 살펴본다. 이 도시는 어떻게 이렇게 질서정연하게 만들어졌을까?', result: '장안은 바둑판 모양의 격자형 도시 설계였습니다. 나중에 일본의 나라와 교토, 신라의 금성(경주)도 이 구조를 본떴습니다. 도시 설계 자체가 당나라 문화의 영향력을 보여줍니다.', insight: '💡 장안의 도시 구조는 동아시아 여러 도시의 모델이 되었다. 신라 경주도 이 영향을 받았다.' },
+          { text: '충격받은 티를 내면 안 된다. 신라 왕자로서 당당하게 행동해야 한다.', result: '왕자다운 자세입니다. 하지만 내심으로는 많이 배워야겠다고 생각합니다. 실제로 신라의 유학생들은 당나라에서 과거를 보기도 했습니다. 신라 출신 최치원은 당나라 과거에 합격해 관리가 된 인물입니다.', insight: '💡 신라인들은 장안에서 단순히 관찰하는 것이 아니라, 당나라 제도에 직접 참여하기도 했다.' }
+        ]
+      },
+      {
+        location: '국자감 · 입학 첫날',
+        title: '율령과 유교를 배우다',
+        encounter: null,
+        source: {
+          label: '📜 교과서 자료 — 유교·율령의 전파',
+          text: '당나라 최고 교육기관 국자감에는 외국 유학생들도 입학할 수 있었다. 신라, 일본, 발해의 학생들이 이곳에서 유교 경전과 율령을 배웠다.'
+        },
+        text: '국자감에 입학 허가를 받았습니다. 교실에는 당나라 학생 외에 발해, 일본에서 온 학생들도 있습니다. 수업은 유교 경전과 율령법입니다. 선생님이 말씀하십니다: "훌륭한 관리가 되려면 예(禮)와 법(法)을 알아야 한다." 이것을 신라에 가져가면 왕권을 강화할 수 있을 것 같습니다.',
+        question: '수업을 들으며 무슨 생각을 합니까?',
+        choices: [
+          { text: '이 율령을 신라에 가져가면, 왕이 더 강해질 수 있겠다.', result: '신라는 실제로 당나라 율령을 받아들였습니다. 하지만 그대로 쓴 것이 아니라 신라 상황에 맞게 고쳤습니다. 당나라의 9품 관제를 도입했지만, 신라의 골품제는 유지했습니다.', insight: '💡 동아시아 나라들은 당나라 제도를 그대로 복사하지 않고, 자국 상황에 맞게 변용했다.' },
+          { text: '유교의 충(忠)·효(孝)·인(仁)… 신라에도 비슷한 가르침이 있었다.', result: '좋은 발견입니다. 신라의 화랑도에도 유교적 가치가 담겨 있었습니다. 당나라 유교를 받아들이는 것이 신라 문화를 버리는 것이 아니라, 이미 있던 것을 더 체계화하는 것이기도 했습니다.', insight: '💡 문화 수용은 기존 문화를 버리는 것이 아니라, 자신의 것과 외래의 것이 결합하는 과정이었다.' },
+          { text: '발해 학생과 눈이 마주쳤다. 우리는 원래 고구려와 백제 사람이었는데, 지금은 여기서 함께 공부하고 있다.', result: '복잡한 감정입니다. 실제로 통일신라와 발해는 경쟁 관계였지만, 장안에서는 같은 교육을 받는 입장이었습니다. 장안은 이처럼 복잡한 관계의 사람들이 공존하는 공간이었습니다.', insight: '💡 장안에서의 교류는 정치적 관계와 별개로 이루어졌다. 장안은 복잡한 동아시아 관계가 교차하는 공간이었다.' }
+        ]
+      },
+      {
+        location: '황실 연회 · 일본 유학승과의 만남',
+        title: '시인과 음악이 있는 밤',
+        encounter: '👥 다른 인물과의 만남 — 일본 유학승',
+        source: {
+          label: '📜 교과서 자료 — 당나라 귀족 문화',
+          text: '이백(李白)은 당나라를 대표하는 시인으로, 장안 귀족들 사이에서 큰 인기를 얻었다. 구양순의 서체(구양순체)는 동아시아 전역에 퍼졌다. 귀족들은 시·서·화(詩書畵)를 교양의 기준으로 삼았다.'
+        },
+        text: '황실 연회에 참석했습니다. 비파 소리와 함께 서역풍 춤이 펼쳐지고, 당나라 귀족들이 시를 주고받습니다. 옆에 앉은 일본 유학승이 조용히 말합니다: "이백이라는 시인의 시가 요즘 장안을 휩쓸고 있답니다. 저도 몇 편 외웠어요." 같은 시를 읽고 같은 서체를 배우는 것이 동아시아에서 교양인의 기준이 되고 있다는 생각이 듭니다.',
+        question: '이 연회를 보며 무슨 생각이 듭니까?',
+        choices: [
+          { text: '귀족들이 시와 음악을 즐기는 이 문화를 신라에도 가져가야겠다.', result: '실제로 당나라 귀족 문화는 동아시아 전역으로 퍼졌습니다. 이백의 시는 신라와 일본에서도 읽혔고, 구양순체 서예는 동아시아 서예의 표준이 됐습니다. 귀족 문화가 동아시아 공통 교양의 기준이 된 것입니다.', insight: '💡 당나라 귀족 문화(시·서·화)는 동아시아 전역으로 퍼져 공통 교양의 기준이 되었다.' },
+          { text: '서역 춤과 당나라 시가 함께 있다니. 당나라는 자기 문화와 외국 문화를 함께 즐기는구나.', result: '날카로운 관찰입니다. 당나라 귀족 문화는 순수하게 중국적인 것이 아니었습니다. 서역의 음악과 춤, 불교적 요소, 유교적 가르침이 뒤섞인 복합 문화였습니다. 이 혼합 자체가 당 문화의 특징이었습니다.', insight: '💡 당나라 귀족 문화는 자국 문화와 외래 문화가 융합된 복합 문화였다. 이 개방성이 당 문화를 풍요롭게 했다.' },
+          { text: '일본 승려도 이백의 시를 외운다. 같은 시를 읽는다는 것이 우리를 연결하는 것 같다.', result: '정확합니다. 한자로 쓰인 이백의 시, 구양순의 서체, 유교 경전은 국적을 넘어 동아시아 지식인들을 연결하는 공통 언어가 됐습니다. 문학과 예술이 문화권을 만드는 데 기여한 것입니다.', insight: '💡 시·서예 등 귀족 문화도 동아시아 문화권 형성에 기여했다. 같은 문화를 공유한다는 것이 연대감을 만들었다.' }
+        ]
+      },
+      {
+        location: '황성 앞 대로 · 조공 행렬',
+        title: '세계가 황제에게 머리를 숙인다',
+        encounter: null,
+        source: {
+          label: '📜 교과서 자료 — 예빈도(禮賓圖)',
+          text: '당나라 황제는 "천가한(天可汗)"이라 불렸다. 하늘 아래 모든 나라의 지배자라는 뜻. 동아시아 각국은 당 황제에게 정기적으로 사신을 보내 조공했다.'
+        },
+        text: '황성 앞 대로에서 조공 행렬을 봅니다. 신라, 일본, 발해, 토번, 서역 각국의 사신들이 황제에게 예를 바치러 갑니다. 신라 사신도 보입니다. 나의 나라가 저기서 고개를 숙이고 있습니다.',
+        question: '이 광경을 보고 어떤 감정입니까?',
+        choices: [
+          { text: '우리 신라도 당나라에 머리를 숙여야 하다니. 씁쓸하다.', result: '솔직한 감정입니다. 조공 체제는 굴욕적인 면이 있었지만, 동시에 실질적 이익도 있었습니다. 당나라의 인정을 받으면 교역 허가, 군사 지원, 유학 기회가 주어졌습니다. 국제 관계는 언제나 복잡합니다.', insight: '💡 조공 체제는 단순한 굴복이 아니라, 서로 이익을 주고받는 외교적 틀이었다. 하지만 그 안에 힘의 불균형이 존재했다.' },
+          { text: '당나라가 이렇게 강하다면, 우리도 이렇게 되어야 한다. 더 열심히 배워야겠다.', result: '이것이 많은 동아시아 유학생들의 마음이었을 것입니다. 당나라를 모델로 삼아 자국을 발전시키려는 욕구. 이 욕구가 동아시아 문화권 형성의 원동력이기도 했습니다.', insight: '💡 당나라의 선진 문화에 대한 동경이 동아시아 나라들이 당 문화를 적극 수용하게 만든 힘이었다.' },
+          { text: '신라가 삼국을 통일했는데, 세계에서 보면 우리는 아직 작은 나라구나.', result: '균형 잡힌 시각입니다. 신라의 삼국통일은 한반도에서는 큰 사건이었지만, 동아시아 전체 맥락에서는 당나라라는 거대한 세력 앞에 놓인 나라의 이야기이기도 했습니다. 역사는 항상 더 큰 맥락 속에 있습니다.', insight: '💡 역사적 사건의 의미는 어느 규모에서 보느냐에 따라 달라진다. 신라통일도 한반도와 동아시아라는 두 개의 시선이 필요하다.' }
+        ]
+      }
+    ],
+    ending: {
+      title: '신라 왕자 김충의 장안 탐험',
+      keywords: ['율령·유교 전파', '귀족 문화 공유', '동아시아 문화권', '조공·외교 체제', '도시 구조 모방'],
+    }
+  }
+};
+
+let currentChar = null;
+let currentScene = 0;
+let choiceLog = [];
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function startGame(char) {
+  currentChar = char;
+  currentScene = 0;
+  choiceLog = [];
+  showScreen('game');
+  renderScene();
+}
+
+function renderScene() {
+  const story = STORIES[currentChar];
+  const scene = story.scenes[currentScene];
+  const total = story.scenes.length;
+
+  document.getElementById('progress-fill').style.width = (currentScene / total * 100) + '%';
+  document.getElementById('progress-text').textContent = `장면 ${currentScene + 1} / ${total}`;
+  document.getElementById('scene-char-emoji').textContent = story.emoji;
+  document.getElementById('scene-char-name').textContent = story.name;
+  document.getElementById('scene-num').textContent = `장면 ${currentScene + 1}`;
+  document.getElementById('scene-location').textContent = scene.location;
+
+  let html = '';
+
+  if (scene.encounter) {
+    html += `<div class="encounter-badge">${scene.encounter}</div>`;
+  }
+
+  html += `<div class="scene-title">${scene.title}</div>`;
+  html += `<div class="source-box"><div class="source-label">${scene.source.label}</div><div class="source-text">${scene.source.text}</div></div>`;
+  html += `<div class="scene-text">${scene.text}</div>`;
+  html += `<div class="scene-question">${scene.question}</div>`;
+  html += `<div class="choices">`;
+
+  ['①','②','③'].forEach((num, i) => {
+    html += `<button class="choice-btn" data-num="${num}" onclick="selectChoice(${i})">${scene.choices[i].text}</button>`;
+  });
+
+  html += `</div>`;
+  document.getElementById('scene-content').innerHTML = html;
+}
+
+function selectChoice(idx) {
+  const story = STORIES[currentChar];
+  const scene = story.scenes[currentScene];
+  const choice = scene.choices[idx];
+  choiceLog.push({ scene: scene.title, choice: choice.text, insight: choice.insight });
+
+  document.getElementById('progress-fill').style.width = ((currentScene + 1) / story.scenes.length * 100) + '%';
+
+  let html = `<div class="scene-title">${scene.title}</div>`;
+  html += `<div class="result-box"><div class="result-label">▶ 선택한 행동</div><div class="result-text">${choice.text}</div></div>`;
+  html += `<div class="result-box"><div class="result-label">📖 결과</div><div class="result-text">${choice.result}</div></div>`;
+  html += `<div class="insight-box"><div class="insight-label">🔍 이 장면이 보여주는 것</div><div class="insight-text">${choice.insight}</div></div>`;
+  html += `<div class="btn-row">`;
+
+  if (currentScene < story.scenes.length - 1) {
+    html += `<button class="btn-primary" onclick="nextScene()">다음 장면으로 →</button>`;
+  } else {
+    html += `<button class="btn-primary" onclick="showEnding()">장안 탐험 마무리</button>`;
+  }
+  html += `</div>`;
+
+  document.getElementById('scene-content').innerHTML = html;
+  window.scrollTo(0, 0);
+}
+
+function nextScene() {
+  currentScene++;
+  renderScene();
+}
+
+function showEnding() {
+  const story = STORIES[currentChar];
+  const ending = story.ending;
+
+  document.getElementById('progress-fill').style.width = '100%';
+
+  let summaryHtml = choiceLog.map((log, i) => `
+    <div class="summary-item">
+      <div class="summary-num">${i + 1}</div>
+      <div><strong style="color:var(--text);font-size:13px;">${log.scene}</strong><br>${log.insight.replace('💡 ','')}</div>
+    </div>
+  `).join('');
+
+  let keywordHtml = ending.keywords.map(k => `<span class="keyword">${k}</span>`).join('');
+
+  const html = `
+    <div style="text-align:center;margin-bottom:10px;"><div style="font-size:52px;margin-bottom:14px;">${story.emoji}</div></div>
+    <div class="ending-title">${ending.title}</div>
+    <div class="ending-subtitle">탐험 완료</div>
+
+    <div style="margin-bottom:22px;">
+      <div style="font-size:12px;color:var(--gold);letter-spacing:2px;margin-bottom:14px;">▪ 오늘 발견한 것들</div>
+      ${summaryHtml}
+    </div>
+
+    <div style="margin-bottom:22px;">
+      <div style="font-size:12px;color:var(--gold);letter-spacing:2px;margin-bottom:12px;">▪ 장안을 설명하는 키워드</div>
+      <div class="keyword-wrap">${keywordHtml}</div>
+    </div>
+
+    <div class="write-prompt">
+      <div class="write-prompt-title">✏️ 이제 직접 써보세요</div>
+      <div class="write-prompt-text">게임에서 경험한 것을 바탕으로 글을 써보세요.</div>
+      <ul class="write-condition">
+        <li>나는 누구였는지</li>
+        <li>장안에서 나는 어떤 경험을 했는지</li>
+        <li>장안이 국제도시가 될 수 있었던 이유는 무엇인지</li>
+      </ul>
+    </div>
+
+    <div class="btn-row" style="margin-top:26px;">
+      <button class="btn-primary" onclick="showScreen('title')">다른 인물로 다시 탐험</button>
+    </div>
+  `;
+
+  document.getElementById('ending-content').innerHTML = html;
+  showScreen('ending');
+}
+</script>
+</body>
+</html>
